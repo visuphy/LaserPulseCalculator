@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laser Pulse Calculator</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar - Light Theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* Dropdown styling fix */
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* Tooltip Arrow */
+        .tooltip-arrow {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+    </style>
+<!-- Shared Header & Footer Styles -->
+    <link rel="stylesheet" href="/header.css">
+    <link rel="stylesheet" href="/footer.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Dynamic Header Include -->
+    <div id="header-placeholder"></div>
+
+    <div class="flex-grow max-w-6xl mx-auto w-full p-4 md:p-8">
+        <!-- Header -->
+        <header class="mb-8 flex items-center space-x-3">
+            <div class="p-2 bg-green-600 rounded-lg shadow-md">
+                <i data-lucide="zap" class="w-8 h-8 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Laser Pulse Calculator</h1>
+                <p class="text-slate-500 text-sm">Calculate energy, power, intensity, and fluence</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- INPUTS COLUMN -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="settings-2" class="w-5 h-5 mr-2 text-green-600"></i>
+                        Input Parameters
+                    </h2>
+
+                    <form id="calculator-form" class="space-y-5">
+                        
+                        <!-- Pulse Duration -->
+                        <div class="group relative">
+                            <div class="flex items-center gap-2 mb-1">
+                                <label class="block text-sm font-medium text-slate-600">Pulse Duration (FWHM)</label>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-4 h-4 text-slate-400 cursor-help hover:text-green-600 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Full Width at Half Maximum (τ)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex rounded-md shadow-sm">
+                                <input type="number" id="duration" step="any" value="100" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md bg-white border border-slate-300 text-slate-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm placeholder-slate-400 transition-colors" placeholder="0">
+                                <select id="duration_unit" class="bg-slate-100 border border-l-0 border-slate-300 text-slate-700 sm:text-sm rounded-r-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 cursor-pointer w-20 hover:bg-slate-200 transition-colors">
+                                    <option value="fs">fs</option>
+                                    <option value="ps">ps</option>
+                                    <option value="ns">ns</option>
+                                    <option value="us">μs</option>
+                                    <option value="ms">ms</option>
+                                    <option value="s">s</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Repetition Rate -->
+                        <div class="group relative">
+                            <div class="flex items-center gap-2 mb-1">
+                                <label class="block text-sm font-medium text-slate-600">Repetition Rate</label>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-4 h-4 text-slate-400 cursor-help hover:text-green-600 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Pulses per unit of time (R_rep)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex rounded-md shadow-sm">
+                                <input type="number" id="rate" step="any" value="80" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md bg-white border border-slate-300 text-slate-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm placeholder-slate-400 transition-colors" placeholder="0">
+                                <select id="rate_unit" class="bg-slate-100 border border-l-0 border-slate-300 text-slate-700 sm:text-sm rounded-r-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 cursor-pointer w-20 hover:bg-slate-200 transition-colors">
+                                    <option value="THz">THz</option>
+                                    <option value="GHz">GHz</option>
+                                    <option value="MHz" selected>MHz</option>
+                                    <option value="kHz">kHz</option>
+                                    <option value="Hz">Hz</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Average Power -->
+                        <div class="group relative">
+                            <div class="flex items-center gap-2 mb-1">
+                                <label class="block text-sm font-medium text-slate-600">Average Power</label>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-4 h-4 text-slate-400 cursor-help hover:text-green-600 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Output average power (P_avg)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex rounded-md shadow-sm">
+                                <input type="number" id="power" step="any" value="1" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md bg-white border border-slate-300 text-slate-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm placeholder-slate-400 transition-colors" placeholder="0">
+                                <select id="power_unit" class="bg-slate-100 border border-l-0 border-slate-300 text-slate-700 sm:text-sm rounded-r-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 cursor-pointer w-20 hover:bg-slate-200 transition-colors">
+                                    <option value="kW">kW</option>
+                                    <option value="W" selected>W</option>
+                                    <option value="mW">mW</option>
+                                    <option value="uW">μW</option>
+                                    <option value="nW">nW</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Spot Diameter -->
+                        <div class="group relative">
+                            <div class="flex items-center gap-2 mb-1">
+                                <label class="block text-sm font-medium text-slate-600">Spot Diameter</label>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-4 h-4 text-slate-400 cursor-help hover:text-green-600 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Beam diameter at 1/e² (d)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex rounded-md shadow-sm">
+                                <input type="number" id="diameter" step="any" value="10" class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md bg-white border border-slate-300 text-slate-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm placeholder-slate-400 transition-colors" placeholder="0">
+                                <select id="diameter_unit" class="bg-slate-100 border border-l-0 border-slate-300 text-slate-700 sm:text-sm rounded-r-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 cursor-pointer w-20 hover:bg-slate-200 transition-colors">
+                                    <option value="um" selected>μm</option>
+                                    <option value="mm">mm</option>
+                                    <option value="cm">cm</option>
+                                    <option value="m">m</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-green-50 rounded-xl p-4 border border-green-100 text-xs text-slate-600">
+                    <p class="mb-2"><strong class="text-green-700">Physics Notes:</strong></p>
+                    <ul class="list-disc pl-4 space-y-1">
+                        <li>Gaussian Peak Power: <span class="font-mono text-green-700">~0.941 × P_rect</span></li>
+                        <li>Sech² Peak Power: <span class="font-mono text-green-700">~0.881 × P_rect</span></li>
+                        <li>Peak Intensity/Fluence (Gaussian Spatial): <span class="font-mono text-green-700">2 × (P_peak/Area)</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- OUTPUTS COLUMN -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Main Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Pulse Energy -->
+                    <div class="bg-white p-5 rounded-xl border-l-4 border-green-500 shadow-sm border-y border-r border-slate-200 relative group hover:shadow-md transition-all">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                            <i data-lucide="battery-charging" class="w-12 h-12 text-green-600"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-slate-500 text-sm font-medium uppercase tracking-wider">Pulse Energy</p>
+                            <div class="group/tooltip relative">
+                                <i data-lucide="info" class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-green-600 transition-colors"></i>
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                    E = P_avg / R_rep
+                                    <div class="tooltip-arrow"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-baseline">
+                            <span id="out_energy" class="text-3xl font-bold text-slate-800">-</span>
+                            <span id="unit_energy" class="ml-2 text-lg text-green-600 font-mono">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Pulse Separation -->
+                    <div class="bg-white p-5 rounded-xl border-l-4 border-emerald-500 shadow-sm border-y border-r border-slate-200 relative group hover:shadow-md transition-all">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                            <i data-lucide="activity" class="w-12 h-12 text-emerald-600"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-slate-500 text-sm font-medium uppercase tracking-wider">Pulse Separation</p>
+                            <div class="group/tooltip relative">
+                                <i data-lucide="info" class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-emerald-600 transition-colors"></i>
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                    t_sep = 1 / R_rep
+                                    <div class="tooltip-arrow"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-baseline">
+                            <span id="out_separation" class="text-3xl font-bold text-slate-800">-</span>
+                            <span id="unit_separation" class="ml-2 text-lg text-emerald-600 font-mono">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Peak Power Section -->
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                        <h3 class="text-lg font-semibold text-slate-800 flex items-center">
+                            <i data-lucide="trending-up" class="w-5 h-5 mr-2 text-amber-500"></i>
+                            Peak Power
+                        </h3>
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-500 uppercase font-bold">Rectangular</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-amber-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        P_peak = E / τ
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_pp_rect" class="text-xl font-bold text-slate-800">-</span>
+                                <span id="unit_pp_rect" class="ml-1 text-sm text-slate-500">-</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-500 uppercase font-bold">Gaussian</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-amber-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        P_peak ≈ 0.941 × (E / τ)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_pp_gauss" class="text-xl font-bold text-amber-600">-</span>
+                                <span id="unit_pp_gauss" class="ml-1 text-sm text-slate-500">-</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-500 uppercase font-bold">Sech²</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-amber-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        P_peak ≈ 0.881 × (E / τ)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_pp_sech" class="text-xl font-bold text-slate-800">-</span>
+                                <span id="unit_pp_sech" class="ml-1 text-sm text-slate-500">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Intensity & Fluence Section -->
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                        <h3 class="text-lg font-semibold text-slate-800 flex items-center">
+                            <i data-lucide="sun" class="w-5 h-5 mr-2 text-rose-500"></i>
+                            Intensity & Fluence
+                        </h3>
+                    </div>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Row 1: Averages -->
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-500 uppercase font-bold">Average Intensity</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-rose-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        I_avg = P_avg / Area
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_int_avg" class="text-xl font-bold text-slate-700">-</span>
+                                <span id="unit_int_avg" class="ml-1 text-xs text-slate-400">-</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-500 uppercase font-bold">Average Fluence</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-rose-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        F_avg = E / Area
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_flu_avg" class="text-xl font-bold text-slate-700">-</span>
+                                <span id="unit_flu_avg" class="ml-1 text-xs text-slate-400">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Peak Gaussian (Highlighted) -->
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-rose-600 uppercase font-bold">Peak Intensity (Gaussian)</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-rose-600 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        I_peak = 2 × P_peak / Area
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_int_peak" class="text-2xl font-bold text-rose-600">-</span>
+                                <span id="unit_int_peak" class="ml-1 text-sm text-slate-500">-</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-rose-600 uppercase font-bold">Peak Fluence (Gaussian)</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-rose-600 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        F_peak = 2 × E / Area
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_flu_peak" class="text-2xl font-bold text-rose-600">-</span>
+                                <span id="unit_flu_peak" class="ml-1 text-sm text-slate-500">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Secondary Shapes -->
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-400 uppercase font-bold">Peak Intensity (Rect)</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-rose-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        I = 2 × P_rect / Area (Gaussian Spatial)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_int_rect" class="text-lg font-bold text-slate-600">-</span>
+                                <span id="unit_int_rect" class="ml-1 text-xs text-slate-400">-</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1 mb-1">
+                                <p class="text-xs text-slate-400 uppercase font-bold">Peak Intensity (Sech²)</p>
+                                <div class="group/tooltip relative">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 cursor-help hover:text-rose-500 transition-colors"></i>
+                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        I = 2 × P_sech² / Area (Gaussian Spatial)
+                                        <div class="tooltip-arrow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline">
+                                <span id="out_int_sech" class="text-lg font-bold text-slate-600">-</span>
+                                <span id="unit_int_sech" class="ml-1 text-xs text-slate-400">-</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Info/Credits Ribbon -->
+    <footer class="mt-8 border-t border-slate-200 bg-white/80 backdrop-blur-sm relative z-10">
+        <div class="max-w-6xl mx-auto px-4 py-4 md:py-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+                
+                <!-- Left: Author & Source -->
+                <div class="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+                    <div class="flex items-center gap-2">
+                        <span>Author:</span>
+                        <a href="https://github.com/Hussein-Tofaili" target="_blank" class="text-green-600 hover:text-green-500 transition-colors flex items-center gap-1 font-medium">
+                            Hussein-Tofaili
+                        </a>
+                    </div>
+                    
+                    <a href="https://github.com/visuphy/LaserPulseCalculator" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-green-600 transition-colors bg-white hover:bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 shadow-sm text-xs md:text-sm">
+                        <i data-lucide="github" class="w-4 h-4"></i>
+                        <span>Source</span>
+                    </a>
+                </div>
+
+                <!-- Right: Discussion & Copyright -->
+                <div class="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+                    <button id="toggle-comments" class="flex items-center gap-2 text-slate-600 hover:text-green-600 transition-colors hover:bg-slate-100 px-2 py-1 rounded-md">
+                        <i data-lucide="message-square" class="w-4 h-4"></i>
+                        <span>Discussion</span>
+                    </button>
+                    
+                    <div class="text-xs text-slate-400 border-l border-slate-300 pl-4">
+                        &copy; 2025 <a href="https://github.com/visuphy" target="_blank" class="text-slate-500 hover:text-green-600 transition-colors">VisuPhy</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section (Hidden by default) -->
+            <div id="comments-panel" class="hidden mt-8 pt-8 border-t border-slate-200">
+                <script src="https://giscus.app/client.js"
+                        data-repo="visuphy/LaserPulseCalculator"
+                        data-repo-id="R_kgDOQdEEzA"
+                        data-category="Comments"
+                        data-category-id="DIC_kwDOQdEEzM4CzCRX"
+                        data-mapping="pathname"
+                        data-strict="0"
+                        data-reactions-enabled="1"
+                        data-emit-metadata="0"
+                        data-input-position="bottom"
+                        data-theme="light_high_contrast"
+                        data-lang="en"
+                        data-loading="lazy"
+                        crossorigin="anonymous"
+                        async>
+                </script>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Icons safely
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.warn("Lucide icons could not be loaded.");
+            }
+            
+            // Toggle Comments
+            const toggleBtn = document.getElementById('toggle-comments');
+            const panel = document.getElementById('comments-panel');
+            if (toggleBtn && panel) {
+                toggleBtn.addEventListener('click', () => {
+                    panel.classList.toggle('hidden');
+                    // Optional: Scroll to comments if opening
+                    if (!panel.classList.contains('hidden')) {
+                        setTimeout(() => panel.scrollIntoView({ behavior: 'smooth' }), 100);
+                    }
+                });
+            }
+        });
+
+        // Constants and Multipliers
+        const multipliers = {
+            duration: { 'fs': 1e-15, 'ps': 1e-12, 'ns': 1e-9, 'us': 1e-6, 'ms': 1e-3, 's': 1 },
+            rate: { 'THz': 1e12, 'GHz': 1e9, 'MHz': 1e6, 'kHz': 1e3, 'Hz': 1 },
+            power: { 'kW': 1e3, 'W': 1, 'mW': 1e-3, 'uW': 1e-6, 'nW': 1e-9 },
+            diameter: { 'm': 1, 'cm': 1e-2, 'mm': 1e-3, 'um': 1e-6 }
+        };
+
+        const shapeFactors = {
+            gaussian: Math.sqrt((4 * Math.log(2)) / Math.PI), // approx 0.941
+            sech2: 0.881 // approx 0.88
+        };
+
+        // DOM Elements
+        const inputs = {
+            duration: document.getElementById('duration'),
+            durationUnit: document.getElementById('duration_unit'),
+            rate: document.getElementById('rate'),
+            rateUnit: document.getElementById('rate_unit'),
+            power: document.getElementById('power'),
+            powerUnit: document.getElementById('power_unit'),
+            diameter: document.getElementById('diameter'),
+            diameterUnit: document.getElementById('diameter_unit'),
+        };
+
+        const outputs = {
+            energy: { val: document.getElementById('out_energy'), unit: document.getElementById('unit_energy') },
+            separation: { val: document.getElementById('out_separation'), unit: document.getElementById('unit_separation') },
+            ppRect: { val: document.getElementById('out_pp_rect'), unit: document.getElementById('unit_pp_rect') },
+            ppGauss: { val: document.getElementById('out_pp_gauss'), unit: document.getElementById('unit_pp_gauss') },
+            ppSech: { val: document.getElementById('out_pp_sech'), unit: document.getElementById('unit_pp_sech') },
+            
+            // Intensity & Fluence
+            intAvg: { val: document.getElementById('out_int_avg'), unit: document.getElementById('unit_int_avg') },
+            fluAvg: { val: document.getElementById('out_flu_avg'), unit: document.getElementById('unit_flu_avg') },
+            
+            intPeak: { val: document.getElementById('out_int_peak'), unit: document.getElementById('unit_int_peak') },
+            fluPeak: { val: document.getElementById('out_flu_peak'), unit: document.getElementById('unit_flu_peak') },
+            
+            intRect: { val: document.getElementById('out_int_rect'), unit: document.getElementById('unit_int_rect') },
+            intSech: { val: document.getElementById('out_int_sech'), unit: document.getElementById('unit_int_sech') },
+        };
+
+        // Formatting Utility
+        function formatSI(value, baseUnit) {
+            if (value === 0) return { val: "0", unit: baseUnit };
+            if (!isFinite(value)) return { val: "∞", unit: baseUnit };
+            if (isNaN(value)) return { val: "-", unit: baseUnit };
+
+            const absVal = Math.abs(value);
+            const prefixes = [
+                { limit: 1e12, prefix: 'T' },
+                { limit: 1e9, prefix: 'G' },
+                { limit: 1e6, prefix: 'M' },
+                { limit: 1e3, prefix: 'k' },
+                { limit: 1, prefix: '' },
+                { limit: 1e-3, prefix: 'm' },
+                { limit: 1e-6, prefix: 'μ' },
+                { limit: 1e-9, prefix: 'n' },
+                { limit: 1e-12, prefix: 'p' },
+                { limit: 1e-15, prefix: 'f' },
+                { limit: 1e-18, prefix: 'a' }
+            ];
+
+            // Find best fit
+            let prefix = '';
+            let scalar = 1;
+
+            if (absVal >= 1) {
+                // For numbers >= 1, find the largest prefix that is smaller than the value
+                // Actually, standard engineering notation logic:
+                if (absVal >= 1e12) { prefix = 'T'; scalar = 1e12; }
+                else if (absVal >= 1e9) { prefix = 'G'; scalar = 1e9; }
+                else if (absVal >= 1e6) { prefix = 'M'; scalar = 1e6; }
+                else if (absVal >= 1e3) { prefix = 'k'; scalar = 1e3; }
+                else { prefix = ''; scalar = 1; }
+            } else {
+                // For numbers < 1
+                if (absVal >= 1e-3) { prefix = 'm'; scalar = 1e-3; }
+                else if (absVal >= 1e-6) { prefix = 'μ'; scalar = 1e-6; }
+                else if (absVal >= 1e-9) { prefix = 'n'; scalar = 1e-9; }
+                else if (absVal >= 1e-12) { prefix = 'p'; scalar = 1e-12; }
+                else if (absVal >= 1e-15) { prefix = 'f'; scalar = 1e-15; }
+                else { prefix = 'a'; scalar = 1e-18; }
+            }
+
+            const formattedVal = (value / scalar).toPrecision(4).replace(/\.0+$/, ''); // Clean up trailing zeros
+            
+            // Re-check for floating point precision artifacts near 1000
+            if(parseFloat(formattedVal) >= 1000 && prefix !== 'T') {
+                // Recursion safety or just simpler logic:
+                // This happens if 999.99 rounds to 1000. It's fine usually.
+            }
+
+            return { val: formattedVal, unit: prefix + baseUnit };
+        }
+
+        function calculate() {
+            // 1. Get Inputs and Convert to SI Base Units (Seconds, Hz, Watts, Meters)
+            const t_fwhm = parseFloat(inputs.duration.value) * multipliers.duration[inputs.durationUnit.value];
+            const rate = parseFloat(inputs.rate.value) * multipliers.rate[inputs.rateUnit.value];
+            const p_avg = parseFloat(inputs.power.value) * multipliers.power[inputs.powerUnit.value];
+            const diameter = parseFloat(inputs.diameter.value) * multipliers.diameter[inputs.diameterUnit.value];
+
+            // Validation
+            if (t_fwhm <= 0 || rate <= 0 || diameter <= 0 || p_avg < 0) {
+                // Handle zeros visually if needed, formatSI handles NaNs/Infinity
+            }
+
+            // 2. Physics Calculations
+            
+            // Pulse Energy (J) = Average Power (W) / Repetition Rate (Hz)
+            const pulseEnergy = p_avg / rate;
+
+            // Pulse Separation (s) = 1 / Repetition Rate (Hz)
+            const separation = 1 / rate;
+
+            // Peak Power (Rectangular) (W) = Energy (J) / Duration (s)
+            const pp_rect = pulseEnergy / t_fwhm;
+
+            // Peak Power (Gaussian) (W)
+            const pp_gauss = shapeFactors.gaussian * pp_rect;
+
+            // Peak Power (Sech2) (W)
+            const pp_sech = shapeFactors.sech2 * pp_rect;
+
+            // Spot Area (cm^2) - Used for standard intensity
+            // Convert diameter to cm for calculation (cm = m * 100)
+            const diameter_cm = diameter * 100;
+            const area_cm2 = Math.PI * Math.pow(diameter_cm / 2, 2);
+
+            // -- Intensity & Fluence Calculations --
+
+            // Average Intensity (W/cm^2) - (Average Power / Spot Area)
+            const int_avg = p_avg / area_cm2;
+
+            // Average Fluence (J/cm^2) - (Pulse Energy / Spot Area) - Flat top equivalent
+            const flu_avg = pulseEnergy / area_cm2;
+
+            // Peak Intensity (Gaussian) (W/cm^2) = 2 * Peak Power / Area
+            const int_peak = (2 * pp_gauss) / area_cm2;
+
+            // Peak Fluence (Gaussian) (J/cm^2) = 2 * Pulse Energy / Area
+            const flu_peak = (2 * pulseEnergy) / area_cm2;
+
+            // Other Intensities (Rect & Sech2)
+            const int_rect = (2 * pp_rect) / area_cm2;
+            const int_sech = (2 * pp_sech) / area_cm2;
+
+
+            // 3. Update UI with Best Fit Units
+
+            const resEnergy = formatSI(pulseEnergy, 'J');
+            outputs.energy.val.textContent = resEnergy.val;
+            outputs.energy.unit.textContent = resEnergy.unit;
+
+            const resSep = formatSI(separation, 's');
+            outputs.separation.val.textContent = resSep.val;
+            outputs.separation.unit.textContent = resSep.unit;
+
+            const resPPRect = formatSI(pp_rect, 'W');
+            outputs.ppRect.val.textContent = resPPRect.val;
+            outputs.ppRect.unit.textContent = resPPRect.unit;
+
+            const resPPGauss = formatSI(pp_gauss, 'W');
+            outputs.ppGauss.val.textContent = resPPGauss.val;
+            outputs.ppGauss.unit.textContent = resPPGauss.unit;
+
+            const resPPSech = formatSI(pp_sech, 'W');
+            outputs.ppSech.val.textContent = resPPSech.val;
+            outputs.ppSech.unit.textContent = resPPSech.unit;
+
+            // Intensities
+            const resIntAvg = formatSI(int_avg, 'W/cm²');
+            outputs.intAvg.val.textContent = resIntAvg.val;
+            outputs.intAvg.unit.textContent = resIntAvg.unit;
+
+            const resIntPeak = formatSI(int_peak, 'W/cm²');
+            outputs.intPeak.val.textContent = resIntPeak.val;
+            outputs.intPeak.unit.textContent = resIntPeak.unit;
+
+            const resIntRect = formatSI(int_rect, 'W/cm²');
+            outputs.intRect.val.textContent = resIntRect.val;
+            outputs.intRect.unit.textContent = resIntRect.unit;
+
+            const resIntSech = formatSI(int_sech, 'W/cm²');
+            outputs.intSech.val.textContent = resIntSech.val;
+            outputs.intSech.unit.textContent = resIntSech.unit;
+
+            // Fluences
+            const resFluAvg = formatSI(flu_avg, 'J/cm²');
+            outputs.fluAvg.val.textContent = resFluAvg.val;
+            outputs.fluAvg.unit.textContent = resFluAvg.unit;
+
+            const resFluPeak = formatSI(flu_peak, 'J/cm²');
+            outputs.fluPeak.val.textContent = resFluPeak.val;
+            outputs.fluPeak.unit.textContent = resFluPeak.unit;
+        }
+
+        // Event Listeners
+        const form = document.getElementById('calculator-form');
+        form.addEventListener('input', calculate);
+        
+        // Initial Calculation
+        calculate();
+
+    </script>
+<!-- Dynamic Footer Include -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Script to include Header/Footer -->
+    <script src="/layout.js" defer></script>
+</body>
+</html>
