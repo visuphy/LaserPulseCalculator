@@ -46,7 +46,7 @@
             border-color: #1e293b transparent transparent transparent;
         }
     </style>
-<!-- Shared Header & Footer Styles -->
+    <!-- Shared Header & Footer Styles -->
     <link rel="stylesheet" href="/header.css">
     <link rel="stylesheet" href="/footer.css">
 </head>
@@ -56,8 +56,8 @@
     <div id="header-placeholder"></div>
 
     <div class="flex-grow max-w-6xl mx-auto w-full p-4 md:p-8">
-        <!-- Header -->
-        <header class="mb-8 flex items-center space-x-3">
+        <!-- Page Title Section (Changed from header to div) -->
+        <div class="mb-8 flex items-center space-x-3">
             <div class="p-2 bg-green-600 rounded-lg shadow-md">
                 <i data-lucide="zap" class="w-8 h-8 text-white"></i>
             </div>
@@ -65,7 +65,7 @@
                 <h1 class="text-2xl font-bold text-slate-900">Laser Pulse Calculator</h1>
                 <p class="text-slate-500 text-sm">Calculate energy, power, intensity, and fluence</p>
             </div>
-        </header>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
@@ -417,8 +417,8 @@
         </div>
     </div>
 
-    <!-- Info/Credits Ribbon -->
-    <footer class="mt-8 border-t border-slate-200 bg-white/80 backdrop-blur-sm relative z-10">
+    <!-- Info/Credits Ribbon (Restored) -->
+    <section class="mt-8 border-t border-slate-200 bg-white/80 backdrop-blur-sm relative z-10">
         <div class="max-w-6xl mx-auto px-4 py-4 md:py-6">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
                 
@@ -470,7 +470,7 @@
                 </script>
             </div>
         </div>
-    </footer>
+    </section>
 
     <script>
         // Initialize Icons safely
@@ -480,8 +480,8 @@
             } else {
                 console.warn("Lucide icons could not be loaded.");
             }
-            
-            // Toggle Comments
+
+            // Toggle Comments (Restored Logic)
             const toggleBtn = document.getElementById('toggle-comments');
             const panel = document.getElementById('comments-panel');
             if (toggleBtn && panel) {
@@ -702,11 +702,10 @@
         calculate();
 
     </script>
-<!-- Dynamic Footer Include -->
+    <!-- Dynamic Footer Include -->
     <div id="footer-placeholder"></div>
 
     <!-- Script to include Header/Footer -->
     <script src="/layout.js" defer></script>
 </body>
-
 </html>
